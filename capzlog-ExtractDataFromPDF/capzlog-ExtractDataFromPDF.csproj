@@ -8,4 +8,11 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <PackageReference Include="itext7" Version="8.0.5" />
+      <PackageReference Include="PdfPig" Version="0.1.9" />
+      <PackageReference Include="PDFsharp" Version="6.1.1" />
+      <PackageReference Include="PDFSharp.Extensions" Version="0.1.2.2" />
+    </ItemGroup>
+
 </Project>
