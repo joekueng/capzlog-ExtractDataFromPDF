@@ -1,10 +1,6 @@
-﻿using System;
-using System.IO;
-using System.Text;
+﻿
 using System.Text.RegularExpressions;
-using capzlog_ExtractDataFromPDF.pdfsharp;
-using iText.Kernel.Pdf.Canvas.Parser;
-using iText.Kernel.Pdf.Canvas.Parser.Listener;
+
 using UglyToad.PdfPig;
 
 
