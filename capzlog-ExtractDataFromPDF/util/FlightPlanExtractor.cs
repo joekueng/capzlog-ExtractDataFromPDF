@@ -12,6 +12,7 @@ public class FlightPlanExtractor
     {
         OperationText = operationText;
     }
+    
 
     public Flight ExtractFlightPlan()
     {
@@ -35,40 +36,59 @@ public class FlightPlanExtractor
         var flightNumberPattern = @"FltNr:\s([A-Z0-9]+)";
         var atcCodePattern = @"ATC:\s([A-Z0-9]+)";
 
-
         FlightInfo flightInfo = new FlightInfo();
+        
         var dateMatch = Regex.Match(OperationText, datePattern);
         if (dateMatch.Success)
         {
-            // Converti la data nel formato desiderato
-            string originalDate = dateMatch.Groups[1].Value; // e.g., "19MAR24"
+            string originalDate = dateMatch.Groups[1].Value; 
             DateTime parsedDate = DateTime.ParseExact(originalDate, "ddMMMyy", CultureInfo.InvariantCulture);
-            flightInfo.Date = parsedDate.ToString("dd.MM.yyyy"); // e.g., "19.03.2024"
+            flightInfo.Date = parsedDate.ToString("dd.MM.yyyy");
+        }
+        else
+        {
+            flightInfo.Date = "N/A";
         }
 
-        flightInfo.Registration = Regex.Match(OperationText, registrationPattern).Groups[1].Value;
-        flightInfo.AircraftType = Regex.Match(OperationText, aircraftTypePattern).Groups[1].Value;
-        flightInfo.Departure = Regex.Match(OperationText, departurePattern).Groups[1].Value;
-        flightInfo.Destination = Regex.Match(OperationText, destinationPattern).Groups[1].Value;
-        flightInfo.Alternate1 = Regex.Match(OperationText, alternate1Pattern).Groups[1].Value;
-        flightInfo.FlightNumber = Regex.Match(OperationText, flightNumberPattern).Groups[1].Value;
-        flightInfo.ATCCode = Regex.Match(OperationText, atcCodePattern).Groups[1].Value;
+        flightInfo.Registration = Regex.Match(OperationText, registrationPattern).Groups[1].Success ? 
+            Regex.Match(OperationText, registrationPattern).Groups[1].Value : "N/A";
+        
+        flightInfo.AircraftType = Regex.Match(OperationText, aircraftTypePattern).Groups[1].Success ? 
+            Regex.Match(OperationText, aircraftTypePattern).Groups[1].Value : "N/A";
+        
+        flightInfo.Departure = Regex.Match(OperationText, departurePattern).Groups[1].Success ? 
+            Regex.Match(OperationText, departurePattern).Groups[1].Value : "N/A";
+        
+        flightInfo.Destination = Regex.Match(OperationText, destinationPattern).Groups[1].Success ? 
+            Regex.Match(OperationText, destinationPattern).Groups[1].Value : "N/A";
+        
+        flightInfo.Alternate1 = Regex.Match(OperationText, alternate1Pattern).Groups[1].Success ? 
+            Regex.Match(OperationText, alternate1Pattern).Groups[1].Value : "N/A";
+        
+        flightInfo.FlightNumber = Regex.Match(OperationText, flightNumberPattern).Groups[1].Success ? 
+            Regex.Match(OperationText, flightNumberPattern).Groups[1].Value : "N/A";
+        
+        flightInfo.ATCCode = Regex.Match(OperationText, atcCodePattern).Groups[1].Success ? 
+            Regex.Match(OperationText, atcCodePattern).Groups[1].Value : "N/A";
+        
         return flightInfo;
     }
 
     private Times ExtractTimes()
     {
-        // Pattern per catturare i tempi STD e STA
         var timesPattern = @"STD:\s(\d{2}:\d{2})\sSTA:\s(\d{2}:\d{2})";
-
         var times = new Times();
-
-        // Esegui il match per estrarre i tempi
         var match = Regex.Match(OperationText, timesPattern);
+
         if (match.Success)
         {
-            times.ScheduledDepartureTime = match.Groups[1].Value; // Estrae STD
-            times.ScheduledArrivalTime = match.Groups[2].Value; // Estrae STA
+            times.ScheduledDepartureTime = match.Groups[1].Value;
+            times.ScheduledArrivalTime = match.Groups[2].Value;
+        }
+        else
+        {
+            times.ScheduledDepartureTime = "N/A";
+            times.ScheduledArrivalTime = "N/A";
         }
 
         return times;
@@ -77,47 +97,29 @@ public class FlightPlanExtractor
     private LoadMass ExtractLoadMass()
     {
         var zeroFuelMassPattern = @"ZFM:\s(\d+)";
-
         LoadMass loadMass = new LoadMass();
-
+        
         var limcMatch = Regex.Match(OperationText, zeroFuelMassPattern);
-        if (limcMatch.Success)
-        {
-            loadMass.ZeroFuelMass = limcMatch.Groups[1].Value; // Fuel quantity for LIMC
-        }
+        loadMass.ZeroFuelMass = limcMatch.Success ? limcMatch.Groups[1].Value : "N/A";
 
         return loadMass;
     }
 
     private Fuel ExtractFuel()
     {
-        // Regular expressions to capture the values for LIMC, LIML, and MIN
         var limcPattern = @"LIMC:\s([^\s]+ [^\s])";
         var limlPattern = @"LIML:\s([^\s]+ [^\s])";
         var minPattern = @"MIN:\s([^\s]+ [^\s])";
-
         var fuelData = new Fuel();
 
-        // Match for LIMC
         var limcMatch = Regex.Match(OperationText, limcPattern);
-        if (limcMatch.Success)
-        {
-            fuelData.Limc = limcMatch.Groups[1].Value; // Fuel quantity for LIMC
-        }
+        fuelData.Limc = limcMatch.Success ? limcMatch.Groups[1].Value : "N/A";
 
-        // Match for LIML
         var limlMatch = Regex.Match(OperationText, limlPattern);
-        if (limlMatch.Success)
-        {
-            fuelData.Liml = limlMatch.Groups[1].Value; // Fuel quantity for LIML
-        }
+        fuelData.Liml = limlMatch.Success ? limlMatch.Groups[1].Value : "N/A";
 
-        // Match for MIN
         var minMatch = Regex.Match(OperationText, minPattern);
-        if (minMatch.Success)
-        {
-            fuelData.MinimumRequired = minMatch.Groups[1].Value; // Fuel quantity for MIN
-        }
+        fuelData.MinimumRequired = minMatch.Success ? minMatch.Groups[1].Value : "N/A";
 
         return fuelData;
     }
@@ -125,18 +127,18 @@ public class FlightPlanExtractor
     private Corrections ExtractCorrections()
     {
         var gainLossPattern = @"Gain\s*/\s*Loss:\s*(GAIN|LOSS)\s*(\d+)\$/TON";
-
         var corrections = new Corrections();
-
-        // Esegui il match per estrarre il tipo di guadagno/perdita e l'importo
         var match = Regex.Match(OperationText, gainLossPattern);
+
         if (match.Success)
         {
-            string type = match.Groups[1].Value; // "GAIN" o "LOSS"
-            double amount = double.Parse(match.Groups[2].Value); // Importo numerico
-
-            // Imposta il valore in positivo per GAIN e in negativo per LOSS
+            string type = match.Groups[1].Value;
+            double amount = double.Parse(match.Groups[2].Value);
             corrections.GainOrLoss = type == "GAIN" ? amount : -amount;
+        }
+        else
+        {
+            corrections.GainOrLoss = 0; // Assuming no gain or loss found
         }
 
         return corrections;

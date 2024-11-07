@@ -6,7 +6,7 @@ namespace capzlog_ExtractDataFromPDF;
 
 public class ExtractText
 {
-    public string ExtractTextBlocks(PdfDocument document, int pageNumber)
+    public string GetTextFormSinglePage(PdfDocument document, int pageNumber)
     {
         if (pageNumber < 1 || pageNumber > document.NumberOfPages)
         {

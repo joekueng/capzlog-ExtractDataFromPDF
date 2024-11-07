@@ -1,5 +1,12 @@
 ﻿namespace capzlog_ExtractDataFromPDF.models
 {
+    public class CrewBriefing
+    {
+        public List<Crew> Crews { get; set; }= new List<Crew>();
+        public FlightAssigment FlightAssignment { get; set; } = new FlightAssigment();
+        public Passegers Passengers { get; set; } = new Passegers();
+    }
+    
     public class Crew
     {
         public string Function { get; set; } = "";

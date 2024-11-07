@@ -1,6 +1,6 @@
 ﻿
 using System.Text.RegularExpressions;
-
+using capzlog_ExtractDataFromPDF.models;
 using UglyToad.PdfPig;
 
 
@@ -13,27 +13,41 @@ namespace capzlog_ExtractDataFromPDF
         {
             using (var pdfDoc = PdfDocument.Open(SRC))
             {
-               
                 
-                SinglePageReader reader = new SinglePageReader();
-                string content = reader.GetCrewAndFlightAssignment(pdfDoc, 89);
-                BriefingExtractor briefingExtractor = new BriefingExtractor(content);
+                Indexing indexing = new Indexing(pdfDoc);
+                List<int> indexFlightPlans = indexing.GetIndexFlightPlans();
+               
+                Console.WriteLine("Found "+indexFlightPlans.Count+" flight plans");
+                
+                List<Flight> flights = new List<Flight>();
 
-                Console.WriteLine("Crew Function: " + briefingExtractor.ExtractCrew()[0].Function);
-                Console.WriteLine("Business Passengers: " + briefingExtractor.ExtractPassengers().Business);
-                Console.WriteLine("Flight Assignment DOI: " + briefingExtractor.ExtractFlightAssignment().DOI);
+                Elaborate elaborate = new Elaborate(pdfDoc);
+                
+                for (int i = 0; i < indexFlightPlans.Count; i++)
+                {
+                    flights.Add(elaborate.GetAllFlightInfo(indexFlightPlans[i]));
+                    
+                }
+                
+                flights.ForEach(flight =>
+                {
+                    Console.WriteLine("Flight Number: " + flight.Info.FlightNumber);
+                    Console.WriteLine("Aircraft Type: " + flight.Info.AircraftType);
+                    Console.WriteLine("Departure: " + flight.Info.Departure);
+                    Console.WriteLine("Arrival: " + flight.Info.Destination);
+                    Console.WriteLine("Date: " + flight.Info.Date);
+                    Console.WriteLine("Zero Fuel Mass: " + flight.MassLoad.ZeroFuelMass);
+                    Console.WriteLine("Scheduled Departure Time: " + flight.Schedule.ScheduledDepartureTime);
+                    flight.CrewBriefing.Crews.ForEach(crew =>
+                    {
+                        Console.WriteLine(crew.Function + ": " + crew.Name);
+                    });
+                    
+                    Console.WriteLine();
 
-                string content2 = reader.GetCrewAndFlightAssignment(pdfDoc, 12);
-                FlightPlanExtractor flightPlanExtractor = new FlightPlanExtractor(content2);
+                });
 
-                Console.WriteLine("Fuel Data Limc: " + flightPlanExtractor.ExtractFlightPlan().FuelData.Limc);
-                Console.WriteLine("Zero Fuel Mass: " + flightPlanExtractor.ExtractFlightPlan().MassLoad.ZeroFuelMass);
-                Console.WriteLine("Scheduled Arrival Time: " + flightPlanExtractor.ExtractFlightPlan().Schedule.ScheduledArrivalTime);
-                Console.WriteLine("GainLoss: " + flightPlanExtractor.ExtractFlightPlan().Correction.GainOrLoss);
-                Console.WriteLine("Aircraft Type: " + flightPlanExtractor.ExtractFlightPlan().Info.AircraftType);
-                Console.WriteLine("Flight Date: " + flightPlanExtractor.ExtractFlightPlan().Info.Date);
-                Console.WriteLine("Departure: " + flightPlanExtractor.ExtractFlightPlan().Info.Departure);
-
+            
 
             }
             

@@ -8,6 +8,8 @@ namespace capzlog_ExtractDataFromPDF.models
         public LoadMass MassLoad { get; set; } = new LoadMass();
         public Fuel FuelData { get; set; } = new Fuel();
         public Corrections Correction { get; set; } = new Corrections();
+
+        public CrewBriefing CrewBriefing { get; set; } = new CrewBriefing();
     }
 
     public class FlightInfo
